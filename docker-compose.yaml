@@ -1,0 +1,10 @@
+services:
+  avito-scraper:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      # Optional — a rotating Russian residential proxy keeps steady volume past Avito's per-IP captcha.
+      # - AVITO_PROXY=http://user:pass@host:port
