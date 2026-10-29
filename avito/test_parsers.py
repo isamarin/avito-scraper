@@ -314,6 +314,17 @@ def test_search_sparse_cards():
     assert job["price"]["text"].startswith("до 6 800")
 
 
+def test_search_all_russia_card_locations():
+    cards = P.parse_search(fixture("search_all_russia.json"))["results"]
+    assert all(c["location"]["slug"] for c in cards)
+    vyborg = next(c for c in cards if c["id"] == 8327863637)
+    # no name in the card, but its id and slug (a valid `location` input) are there
+    assert vyborg["location"]["id"] == 636510 and vyborg["location"]["name"] is None
+    assert vyborg["location"]["slug"] == "vyborg"
+    tver = next(c for c in cards if c["id"] == 8372194504)
+    assert (tver["location"]["name"], tver["location"]["slug"]) == ("Тверь", "tver")
+
+
 def test_search_rejects_other_payloads():
     with pytest.raises(P.ParseError):
         P.parse_search({"result": []})

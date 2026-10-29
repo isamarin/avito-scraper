@@ -49,7 +49,10 @@ x-requested-with: XMLHttpRequest, without it they answer 403):
              data-mfe-state>; unknown = initData.status "not-found".
   SELLER ADS /web/1/profile/items?sellerId=<key>&shortcut=active&page&limit
   REVIEWS    /web/7/user/<key>/ratings?limit&offset&sortRating&photoOnly
-  LOCATIONS  /web/1/slocations?q&limit[&locationId]
+  LOCATIONS  /web/1/slocations?q&limit[&locationId] — with locationId and
+             an empty q, that location comes first, then its parents. Not
+             usable to name every card of a search: after ~6 back-to-back
+             calls it answered 403/429 to all (2026-10-29)
   TREE       /not-found — the smallest page (~300 KB) whose header carries
              the site's full category navigation tree.
   LOC PAGE   /<location slug> — read once per slug for its numeric id.
