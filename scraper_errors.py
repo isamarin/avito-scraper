@@ -1,7 +1,7 @@
 """Shared failure taxonomy for every scraper package.
 
 Each scraper's transport (`<site>/fetch.py`) raises the same four kinds of
-error; subclassing these bases lets ONE route layer (route_glue.py) map
+error; subclassing these bases lets ONE route layer (routes.call) map
 them to HTTP for every site:
 
     UpstreamError   transport failure / 5xx            -> 502, retryable

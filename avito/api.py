@@ -1,4 +1,4 @@
-"""The /avito/* endpoint functions (route_glue's route_table calls them with
+"""The /avito/* endpoint functions (routes.ENDPOINTS calls them with
 the schema's loaded kwargs). Every function caches through
 cache.cached_call keyed on its validated params.
 

@@ -9,7 +9,7 @@ import time
 
 _store = {}
 _lock = threading.Lock()
-MAX_ENTRIES = 2000
+MAX_ENTRIES = 300   # a search page is 0.2-0.45 MB in memory: ~100 MB at the cap
 
 
 def _key(namespace, data):

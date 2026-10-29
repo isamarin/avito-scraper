@@ -37,7 +37,7 @@ from scraper_errors import UpstreamError
 
 class ParseError(UpstreamError):
     """The payload is not the page/JSON the parser expects (layout change):
-    a 502, never a 400 (route_glue maps ValueError to 400)."""
+    a 502, never a 400 (routes.call maps ValueError to 400)."""
 
 
 MOSCOW = timezone(timedelta(hours=3))   # no DST since 2014

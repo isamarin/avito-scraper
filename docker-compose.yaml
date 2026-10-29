@@ -3,7 +3,8 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      # localhost only: the API has no auth, and a published port bypasses the host firewall
+      - "127.0.0.1:8000:8000"
     environment:
       - PORT=8000
       # Optional — a rotating Russian residential proxy keeps steady volume past Avito's per-IP captcha.

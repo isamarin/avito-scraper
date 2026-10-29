@@ -24,8 +24,6 @@ RETRY_BACKOFF = 2          # seconds, multiplied by the attempt number
 # hashes, ~10 ms). Above this a challenge is treated as a block.
 AVITO_MAX_POW_COMPLEXITY = 5
 
-AVITO_PROXY = os.environ.get("AVITO_PROXY") or None
-
 
 def avito_proxy():
     """The proxy for one session (None = direct)."""

@@ -1,7 +1,7 @@
 """Avito (www.avito.ru) transport: plain curl_cffi with browser-impersonated
 TLS, no browser. Egress: one sticky exit per thread session
-(config.avito_proxy(), knob AVITO_EXIT — a Russian residential exit, see
-the probe table in config.py); a retryable failure drops the session, so
+(config.avito_proxy(), env AVITO_PROXY — a Russian residential exit for
+volume); a retryable failure drops the session, so
 the retry rides a fresh exit and solves a fresh challenge.
 
 The site's firewall (research + build 2026-10-23/24):
@@ -54,7 +54,7 @@ x-requested-with: XMLHttpRequest, without it they answer 403):
              the site's full category navigation tree.
   LOC PAGE   /<location slug> — read once per slug for its numeric id.
 
-Failure taxonomy (scraper_errors, mapped to HTTP by route_glue):
+Failure taxonomy (scraper_errors, mapped to HTTP by routes.call):
   AvitoUpstreamError  transport failure / 5xx / unparseable answer — retryable
   AvitoBlocked        439 not cleared / 429 captcha / 403          — retryable
   AvitoBadRequest     upstream 400                                 — never retried
@@ -75,12 +75,14 @@ from urllib.parse import urlencode, urlparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import config
-import egress
 from scraper_errors import BadRequest, Blocked, NotFound, UpstreamError
 from avito import refs
 
 HOST = refs.SITE
 IMPERSONATE = "chrome"
+# Chrome's list on a Russian machine: a browser language that disagrees with
+# the connection's country is a common bot signal.
+ACCEPT_LANGUAGE = "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"
 PAGE_TIMEOUT = 40      # item / profile pages are 0.6-1.7 MB
 JSON_TIMEOUT = 30      # js/items answers 1-2 MB
 
@@ -138,7 +140,7 @@ def _session():
         if proxy:
             sess.proxies = {"http": proxy, "https": proxy}
         # owner rule 2026-10-24: the language matches the exit's country
-        sess.headers.update({"accept-language": egress.accept_language(proxy)})
+        sess.headers.update({"accept-language": ACCEPT_LANGUAGE})
         _local.session = sess
     return sess
 
