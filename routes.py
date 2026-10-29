@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 from bottle import request, response, route
 
 from schema_fields import load_query
-from scraper_errors import BadRequest, NotFound
+from scraper_errors import BadRequest, NotFound, UpstreamError
 from avito import api, schemas
 
 
@@ -42,6 +42,7 @@ def _page_link(path, params, page):
 def paginate(result, path, params):
     """Lift the `pagination` block into the flat shape the hosted API
     returns: count / per_page / current_page / total_pages / next / previous."""
+    result = dict(result)   # `result` is the cached object: popping from it would strip later hits
     pagination = result.pop("pagination", None) or {}
     page = int(pagination.get("page") or 1)
     total_pages = pagination.get("total_pages")
@@ -62,20 +63,23 @@ def paginate(result, path, params):
 
 def call(label, schema_cls, impl, paginated=False):
     """Validate, run, map errors: bad params -> 400, missing entity -> 404,
-    transport / blocks -> 500."""
+    transport / blocks / an unreadable page -> 502, a bug here -> 500."""
     raw = query_dict()
     data, error = load_query(schema_cls, raw)
     if error:
         return json_response(error, 400)
     try:
         result = impl(**data)
+    # before ValueError: JSONDecodeError subclasses it, and a page state we cannot read is not bad input
+    except (UpstreamError, json.JSONDecodeError) as e:
+        return json_response({"error": f"avito {label} failed: {e}"}, 502)
     except ValueError as e:
         return json_response({"error": str(e)}, 400)
     except BadRequest as e:
         return json_response({"error": f"avito rejected the request: {e}"}, 400)
     except NotFound as e:
         return json_response({"error": str(e) or "not found"}, 404)
-    except Exception as e:                 # retries exhausted / blocked
+    except Exception as e:
         return json_response({"error": f"avito {label} failed: {e}"}, 500)
     if paginated:
         result = paginate(result, request.path, raw)

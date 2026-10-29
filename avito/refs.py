@@ -42,7 +42,6 @@ CURRENCY = "RUB"
 # Search sort codes (the `s` param; the site's own select "Сортировать",
 # values read from filtersV2 2026-10-24).
 SORTS = {"relevance": "101", "price_asc": "1", "price_desc": "2", "newest": "104"}
-SORT_NAMES = {code: name for name, code in SORTS.items()}
 # `user` param: the site's "Частные" / "Компании" owner filter.
 SELLER_TYPES = {"private": "1", "company": "2"}
 # /web/7/user/<key>/ratings `sortRating` (the profile page's own select).
