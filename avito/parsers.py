@@ -18,6 +18,8 @@ Russian residential exit on 2026-10-24 (plus the proof-of-work page from
                            without its state (the site's degraded render)
   seller_ads_page*.json.gz /web/1/profile/items pages 1 (50) and 2 (29)
   seller_reviews_*.json.gz /web/7/user/<key>/ratings (newest page 2, negative first)
+  search_all_russia        an all-Russia search (2026-10-29): most cards have
+                           location null and only a locationId
   locations_*.json.gz      /web/1/slocations
   location_page_kazan      /kazan (read for its location id)
   challenge_*.html.gz      the 439 proof-of-work page and the 429 IP captcha
@@ -48,6 +50,7 @@ _MFE_RE = re.compile(r'<script type="mime/invalid" data-mfe-state="true">(.*?)</
 _SIZE_KEY_RE = re.compile(r"^(\d+)x(\d+)$")
 _INT_RE = re.compile(r"\d[\d\s  ]*")
 _TAG_RE = re.compile(r"<[^>]+>")
+_CARD_SLUG_RE = re.compile(r"/([^/?]+)/[^/?]+/")   # /<location slug>/<category slug>/<title>_<id>?...
 
 MONTHS = {"января": 1, "февраля": 2, "марта": 3, "апреля": 4, "мая": 5, "июня": 6, "июля": 7,
           "августа": 8, "сентября": 9, "октября": 10, "ноября": 11, "декабря": 12,
@@ -418,6 +421,7 @@ def parse_card(item):
             if title and title not in promotions:
                 promotions.append(title)
     lat, lng = _float(coords.get("lat")), _float(coords.get("lng"))
+    slug = _CARD_SLUG_RE.match(item["urlPath"]) if isinstance(item.get("urlPath"), str) else None
     return {
         "id": _int(item.get("id")),
         "title": _clean(item.get("title")),
@@ -434,7 +438,10 @@ def parse_card(item):
         } if (category or item.get("categoryId")) else None,
         "location": {
             "id": _int(location.get("id")) or _int(item.get("locationId")),
+            # cards from outside the searched city carry no name, only their
+            # locationId and the slug in urlPath (most of an all-Russia search, 2026-10-29)
             "name": _clean(location.get("name")) or _clean(geo_step.get("addressLocality")),
+            "slug": slug and slug.group(1),
             "address": address,
             "coordinates": {"latitude": lat, "longitude": lng} if lat is not None and lng is not None else None,
             "metro": _metro(geo.get("geoReferences") or geo_step.get("geoReferences")),
